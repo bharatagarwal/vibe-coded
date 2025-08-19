@@ -41,24 +41,36 @@ A Python command-line interface for transcribing audio and video files using Dee
 - Transcribe individual files or entire directories
 - Generate SRT subtitles or plain text transcripts
 - Support for MP3 and MP4 files
+- **Enhanced video processing**: Automatic soft subtitle embedding for MP4 files
 - Batch processing with concurrent execution
 - Multiple Deepgram model support
 - Configurable language and model options
+- Automatic cleanup of temporary files
 
 **Setup:**
 1. Install dependencies: `pip install -r deepgram-cli/requirements.txt`
 2. Set up API key: `echo "DEEPGRAM_API_KEY=your_key" > deepgram-cli/.env`
+3. Install FFmpeg (required for video processing)
 
 **Usage:**
 ```bash
 cd deepgram-cli
-./deepgram_cli.py -f audio.mp3              # Generate subtitles
+./deepgram_cli.py -f audio.mp3              # Generate subtitles for audio
 ./deepgram_cli.py -f audio.mp3 -t           # Generate transcript only
-./deepgram_cli.py -v video.mp4              # Process video file
+./deepgram_cli.py -v video.mp4              # Process video with embedded subtitles
+./deepgram_cli.py -v /path/to/directory     # Process all MP4s in directory
 ./deepgram_cli.py -f /path/to/directory     # Process all MP3s in directory
 ```
+
+**Video Processing Workflow:**
+When using the `-v` flag with MP4 files, the tool performs:
+1. Extracts audio from video using FFmpeg
+2. Sends audio to Deepgram for transcription
+3. Embeds generated subtitles directly into the video file (soft subtitles)
+4. Automatically cleans up temporary files
+5. Outputs a complete video file with switchable subtitles
 
 ## Requirements
 
 - **mp4len**: zsh, ffprobe (from FFmpeg)
-- **deepgram-cli**: Python 3.6+, Deepgram API key
+- **deepgram-cli**: Python 3.6+, Deepgram API key, FFmpeg (for video processing)
