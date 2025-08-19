@@ -40,8 +40,8 @@ A Python command-line interface for transcribing audio and video files using Dee
 **Features:**
 - Transcribe individual files or entire directories
 - Generate SRT subtitles or plain text transcripts
-- Support for MP3 and MP4 files
-- **Enhanced video processing**: Audio extraction from MP4 files for transcription
+- Support for MP3 audio files and MP4/WebM/MKV video files
+- **Enhanced video processing**: Audio extraction from video files for transcription
 - Batch processing with concurrent execution
 - Multiple Deepgram model support
 - Configurable language and model options
@@ -58,12 +58,12 @@ cd deepgram-cli
 ./deepgram_cli.py -f audio.mp3              # Generate subtitles for audio
 ./deepgram_cli.py -f audio.mp3 -t           # Generate transcript only
 ./deepgram_cli.py -v video.mp4              # Generate subtitles for video
-./deepgram_cli.py -v /path/to/directory     # Process all MP4s in directory
+./deepgram_cli.py -v /path/to/directory     # Process all video files in directory
 ./deepgram_cli.py -f /path/to/directory     # Process all MP3s in directory
 ```
 
 **Video Processing Workflow:**
-When using the `-v` flag with MP4 files, the tool performs:
+When using the `-v` flag with video files (MP4/WebM/MKV), the tool performs:
 1. Extracts audio from video using FFmpeg
 2. Sends audio to Deepgram for transcription
 3. Generates SRT subtitle file alongside the original video

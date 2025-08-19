@@ -36,7 +36,8 @@ def extract_audio_from_video(video_path, audio_path):
 def process_audio_file(file_path, args, api_key):
     """Process a single audio file or video file"""
     temp_audio_path = None
-    is_video = file_path.lower().endswith('.mp4')
+    video_extensions = ('.mp4', '.webm', '.mkv')
+    is_video = file_path.lower().endswith(video_extensions)
     
     try:
         # Step 1: Handle video files by extracting audio
@@ -138,7 +139,7 @@ def main():
         "-f", "--file", help="Path to the audio file (MP3) or directory containing MP3 files"
     )
     file_group.add_argument(
-        "-v", "--video", help="Path to the video file (MP4) or directory containing MP4 files"
+        "-v", "--video", help="Path to the video file (MP4/WebM/MKV) or directory containing video files"
     )
 
     parser.add_argument(
@@ -160,8 +161,8 @@ def main():
         file_type = "MP3"
     else:  # args.video
         file_path = args.video
-        file_extension = "*.mp4"
-        file_type = "MP4"
+        file_extension = ["*.mp4", "*.webm", "*.mkv"]
+        file_type = "video"
 
     print(f"File/Directory: {file_path}")
     print(f"Transcript only: {args.transcript}")
@@ -169,7 +170,12 @@ def main():
     # Check if the path is a directory or a file
     if os.path.isdir(file_path):
         # Find all files with the appropriate extension in the directory
-        media_files = glob.glob(os.path.join(file_path, file_extension))
+        media_files = []
+        if isinstance(file_extension, list):
+            for ext in file_extension:
+                media_files.extend(glob.glob(os.path.join(file_path, ext)))
+        else:
+            media_files = glob.glob(os.path.join(file_path, file_extension))
         if not media_files:
             print(f"No {file_type} files found in directory: {file_path}")
             return
