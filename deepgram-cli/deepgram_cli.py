@@ -33,28 +33,9 @@ def extract_audio_from_video(video_path, audio_path):
         return False
 
 
-def embed_subtitles_in_video(video_path, srt_path, output_path):
-    """Embed subtitles into video file using FFmpeg"""
-    cmd = [
-        "ffmpeg", "-i", video_path, "-i", srt_path,
-        "-c", "copy", "-c:s", "mov_text",
-        "-metadata:s:s:0", "language=eng",
-        output_path, "-y"  # -y to overwrite without asking
-    ]
-    
-    try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"Error embedding subtitles: {e.stderr}")
-        return False
-
-
 def process_audio_file(file_path, args, api_key):
     """Process a single audio file or video file"""
     temp_audio_path = None
-    temp_srt_path = None
-    temp_output_path = None
     is_video = file_path.lower().endswith('.mp4')
     
     try:
@@ -114,50 +95,19 @@ def process_audio_file(file_path, args, api_key):
             input_dir = os.path.dirname(file_path)
             base_filename_no_ext = os.path.splitext(os.path.basename(file_path))[0]
 
-            if is_video:
-                # Step 3: For video files, create temporary SRT and embed subtitles
-                temp_srt_fd, temp_srt_path = tempfile.mkstemp(suffix='.srt')
-                with os.fdopen(temp_srt_fd, 'w') as f:
-                    f.write(srt_captions)
-                
-                # Create temporary output video file
-                temp_output_fd, temp_output_path = tempfile.mkstemp(suffix='.mp4')
-                os.close(temp_output_fd)
-                
-                print(f"Embedding subtitles into video...")
-                if embed_subtitles_in_video(file_path, temp_srt_path, temp_output_path):
-                    # Replace original file with subtitle-embedded version
-                    os.replace(temp_output_path, file_path)
-                    print(f"Subtitles embedded into {file_path}")
-                    temp_output_path = None  # Don't try to clean up since we moved it
-                else:
-                    print(f"Failed to embed subtitles. Original file unchanged.")
-            else:
-                # For audio files, save SRT as before
-                srt_filename = os.path.join(input_dir, f"{base_filename_no_ext}.srt")
-                with open(srt_filename, "w") as f:
-                    f.write(srt_captions)
-                print(f"SRT subtitles saved to: {srt_filename}")
+            # Save SRT file for both audio and video files
+            srt_filename = os.path.join(input_dir, f"{base_filename_no_ext}.srt")
+            with open(srt_filename, "w") as f:
+                f.write(srt_captions)
+            print(f"SRT subtitles saved to: {srt_filename}")
 
     except Exception as e:
         print(f"An error occurred processing {file_path}: {e}")
     finally:
-        # Step 4: Cleanup temporary files
+        # Cleanup temporary audio file
         if temp_audio_path and os.path.exists(temp_audio_path):
             try:
                 os.remove(temp_audio_path)
-            except OSError:
-                pass
-        
-        if temp_srt_path and os.path.exists(temp_srt_path):
-            try:
-                os.remove(temp_srt_path)
-            except OSError:
-                pass
-                
-        if temp_output_path and os.path.exists(temp_output_path):
-            try:
-                os.remove(temp_output_path)
             except OSError:
                 pass
 
